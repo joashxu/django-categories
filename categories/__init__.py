@@ -3,7 +3,7 @@ __version_info__ = {
     'minor': 3,
     'micro': 0,
     'releaselevel': 'beta',
-    'serial': 4
+    'serial': 5
 }
 
 
@@ -19,11 +19,15 @@ def get_version(short=False):
 __version__ = get_version()
 
 
+default_app_config = 'categories.apps.CategoriesConfig'
+
 try:
-    from categories import settings
-    from categories.registration import (_process_registry, register_fk,
-                                        register_m2m)
-    _process_registry(settings.FK_REGISTRY, register_fk)
-    _process_registry(settings.M2M_REGISTRY, register_m2m)
+    import django
+    if django.VERSION[1] < 7:
+        from categories import settings
+        from categories.registration import (_process_registry, register_fk,
+                                            register_m2m)
+        _process_registry(settings.FK_REGISTRY, register_fk)
+        _process_registry(settings.M2M_REGISTRY, register_m2m)
 except:
     pass

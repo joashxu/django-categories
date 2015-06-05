@@ -3,25 +3,15 @@ from django.db import models
 from django.utils.encoding import force_unicode
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey
-from django.core.files.storage import get_storage_class
 
 from django.utils.translation import ugettext_lazy as _
 
-from .settings import (RELATION_MODELS, RELATIONS, THUMBNAIL_UPLOAD_PATH,
-                       THUMBNAIL_STORAGE)
+from .settings import RELATION_MODELS, RELATIONS
 
 from .base import CategoryBase
 
-STORAGE = get_storage_class(THUMBNAIL_STORAGE)
-
 
 class Category(CategoryBase):
-    thumbnail = models.FileField(
-        upload_to=THUMBNAIL_UPLOAD_PATH,
-        null=True, blank=True,
-        storage=STORAGE(),)
-    thumbnail_width = models.IntegerField(blank=True, null=True)
-    thumbnail_height = models.IntegerField(blank=True, null=True)
     order = models.IntegerField(default=0)
     alternate_title = models.CharField(
         blank=True,
@@ -71,22 +61,6 @@ class Category(CategoryBase):
             """
             return self.categoryrelation_set.filter(relation_type=relation_type)
 
-    def save(self, *args, **kwargs):
-        if self.thumbnail:
-            from django.core.files.images import get_image_dimensions
-            import django
-            if django.VERSION[1] < 2:
-                width, height = get_image_dimensions(self.thumbnail.file)
-            else:
-                width, height = get_image_dimensions(self.thumbnail.file, close=True)
-        else:
-            width, height = None, None
-
-        self.thumbnail_width = width
-        self.thumbnail_height = height
-
-        super(Category, self).save(*args, **kwargs)
-
     class Meta(CategoryBase.Meta):
         verbose_name = _('category')
         verbose_name_plural = _('categories')
@@ -134,11 +108,3 @@ class CategoryRelation(models.Model):
 
     def __unicode__(self):
         return u"CategoryRelation"
-
-try:
-    from south.db import db  # South is required for migrating. Need to check for it
-    from django.db.models.signals import post_syncdb
-    from categories.migration import migrate_app
-    post_syncdb.connect(migrate_app)
-except ImportError:
-    pass

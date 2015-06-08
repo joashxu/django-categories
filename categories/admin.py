@@ -32,6 +32,7 @@ if RELATION_MODELS:
 class CategoryAdminForm(CategoryBaseAdminForm):
     class Meta:
         model = Category
+        fields = '__all__'
 
     def clean_alternate_title(self):
         if self.instance is None or not self.cleaned_data['alternate_title']:
@@ -45,11 +46,10 @@ class CategoryAdmin(CategoryBaseAdmin):
     list_display = ('name', 'alternate_title', 'active')
     fieldsets = (
         (None, {
-            'fields': ('parent', 'name', 'thumbnail', 'active')
+            'fields': ('parent', 'name', 'active')
         }),
         (_('Meta Data'), {
-            'fields': ('alternate_title', 'alternate_url', 'description',
-                        'meta_keywords', 'meta_extra'),
+            'fields': ('alternate_title', 'alternate_url', 'description', 'meta_keywords', 'meta_extra'),
             'classes': ('collapse',),
         }),
         (_('Advanced'), {
